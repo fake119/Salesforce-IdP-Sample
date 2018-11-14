@@ -56,7 +56,6 @@ import org.xml.sax.SAXException;
 import com.i2max.saml.SAMLWrapper;
 
 @Controller
-@EnableAutoConfiguration
 public class SampleController {
 	private static final Logger logger = LoggerFactory.getLogger(SampleController.class);
 
