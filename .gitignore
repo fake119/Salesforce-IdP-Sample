@@ -1,6 +1,9 @@
 target/*
+target/classes/*
+target/test-classes/*
 target/test-classes/salesforce_idp/Test.class
 target/classes/com/ServletInit.class
 target/classes/com/i2max/hello/SampleController.class
 target/classes/com/i2max/saml/SAMLWrapper.class
 target/classes/com/rackspace/saml/CertManager.class
+
