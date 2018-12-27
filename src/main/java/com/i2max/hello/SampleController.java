@@ -246,5 +246,4 @@ public class SampleController {
 
 		return "sso/acs";
 	}
-
 }
