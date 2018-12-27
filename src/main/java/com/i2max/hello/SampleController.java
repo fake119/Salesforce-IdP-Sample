@@ -44,6 +44,7 @@ import org.opensaml.xml.parse.XMLParserException;
 import org.opensaml.xml.security.x509.BasicX509Credential;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureValidator;
+import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -178,32 +179,20 @@ public class SampleController {
 		Assertion assertion = assList.get(0);
 		Signature signature = assertion.getSignature();
 
-		CertificateFactory certificateFactory;
-		SignatureValidator signatureValidator = null;
-		X509EncodedKeySpec publicKeySpec = null;
-		InputStream certInputStream = null;
-
 		File certificateFile = new File("C:/certifications/idp/idp_certification.crt");
 
 		String assertResult = "Success.!!";
+		Boolean isAssertOK = true;
 		try {
-			certInputStream = new FileInputStream(certificateFile);
+			InputStream certInputStream = new FileInputStream(certificateFile);
 
-			certificateFactory = CertificateFactory.getInstance("X.509");
+			CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 			X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(certInputStream);
 			// pull out the public key part of the certificate into a KeySpec
-			publicKeySpec = new X509EncodedKeySpec(certificate.getPublicKey().getEncoded());
+			X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(certificate.getPublicKey().getEncoded());
 			// get KeyFactory object that creates key objects,specifying RSA
-		} catch (CertificateException e1) {
-			logger.debug("CertificateException thrown");
-			e1.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		KeyFactory keyFactory;
-		try {
 
-			keyFactory = KeyFactory.getInstance("RSA");
+			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 			logger.debug("Security Provider: " + keyFactory.getProvider().toString());
 			// generate public key to validate signatures
 			PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
@@ -214,26 +203,21 @@ public class SampleController {
 			// add public key value
 			publicCredential.setPublicKey(publicKey);
 			// create SignatureValidator
-			signatureValidator = new SignatureValidator(publicCredential);
+			SignatureValidator signatureValidator = new SignatureValidator(publicCredential);
 			logger.debug("Algorithm:" + publicKey.getAlgorithm());
 			logger.debug("Format:" + publicKey.getFormat());
 
 			// no validation exception was thrown
-			logger.debug("Signature is valid.");
-		} catch (NoSuchAlgorithmException e) {
-			assertResult = "No Such Algorithm";
-			e.printStackTrace();
-		} catch (InvalidKeySpecException e) {
-			assertResult = "Invalid Key Spec";
-			e.printStackTrace();
-		}
-
-		try {
 			signatureValidator.validate(signature);
 			assertResult = "Signature is valid.";
-		} catch (Exception ve) {
-			assertResult = "Signature is NOT valid.";
-			ve.printStackTrace();
+		} catch (Exception ex) {
+			isAssertOK = false;
+			assertResult = ex.getLocalizedMessage();
+		}
+
+		if (isAssertOK == false) {
+			model.addAttribute("assert_result", assertResult);
+			return "sso/acs";
 		}
 
 		// 넘어온 값 뽑기.
