@@ -211,7 +211,7 @@ public class SampleController {
 		}
 
 		if (isAssertOK == false) {
-			model.addAttribute("assert_result", assertResult);
+			model.addAttribute("assert_result", "FAILED :: " + assertResult);
 			return "sso/acs";
 		}
 
